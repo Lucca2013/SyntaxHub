@@ -1,15 +1,54 @@
-"use client"; // Adicione esta linha no topo do arquivo
+"use client";
 
-export default function signin() {
+import { useState } from "react";
+
+export default function Signup() {
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  async function signupButton(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (password !== confirmPassword) {
+      alert("Passwords do not match!");
+      return;
+    }
+
+    const info = { username, email, password };
+
+    try {
+      const response = await fetch("../api/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(info),
+      });
+
+      if (response.ok) {
+        alert("User created successfully!");
+        setUsername("");
+        setEmail("");
+        setPassword("");
+        setConfirmPassword("");
+      } else {
+        alert("Failed to create user.");
+      }
+    } catch (error) {
+      console.error("Signup error:", error);
+      alert("An error occurred.");
+    }
+  }
+
   return (
     <>
       <meta charSet="UTF-8" />
-      <title>SyntaxHub - Sign In</title>
+      <title>SyntaxHub - Sign Up</title>
       <meta name="viewport" content="width=device-width, initial-scale=1" />
+
       <style
         dangerouslySetInnerHTML={{
-          __html:
-            `
+          __html: `
         :root {
             --neon-green: #00ff41;
             --neon-purple: #9d00ff;
@@ -301,7 +340,7 @@ export default function signin() {
                 padding: 10px 20px;
             }
         }
-    `
+      `,
         }}
       />
 
@@ -311,7 +350,7 @@ export default function signin() {
           className="logo"
           style={{
             textShadow:
-              "rgba(0, 255, 65, 0.7) 0px 0px 10px, rgba(0, 255, 65, 0.5) 0px 0px 20px"
+              "rgba(0, 255, 65, 0.7) 0px 0px 10px, rgba(0, 255, 65, 0.5) 0px 0px 20px",
           }}
         >
           SyntaxHub
@@ -327,51 +366,89 @@ export default function signin() {
       </header>
 
       <div className="signin-container">
-        <h1 className="signin-title">Sign In to SyntaxHub</h1>
+        <h1 className="signin-title">Create Your Account</h1>
 
-        <form className="signin-form">
+        <form className="signin-form" onSubmit={signupButton}>
           <div className="input-group">
-            <label htmlFor="email" className="input-label">Email</label>
+            <label htmlFor="input-username" className="input-label">
+              Username
+            </label>
             <input
-              type="email"
-              id="email"
+              id="input-username"
+              type="text"
               className="input-field"
-              placeholder="you@example.com"
+              placeholder="YourUsername"
               required
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
             />
           </div>
 
           <div className="input-group">
-            <label htmlFor="password" className="input-label">Password</label>
+            <label htmlFor="input-email" className="input-label">
+              Email
+            </label>
             <input
+              id="input-email"
+              type="email"
+              className="input-field"
+              placeholder="you@example.com"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+
+          <div className="input-group">
+            <label htmlFor="input-password" className="input-label">
+              Password
+            </label>
+            <input
+              id="input-password"
               type="password"
-              id="password"
               className="input-field"
               placeholder="••••••••"
               required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+
+          <div className="input-group">
+            <label htmlFor="confirmPassword" className="input-label">
+              Confirm Password
+            </label>
+            <input
+              type="password"
+              id="confirmPassword"
+              className="input-field"
+              placeholder="••••••••"
+              required
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
             />
           </div>
 
           <button type="submit" className="btn">
-            Sign In
+            Sign Up
           </button>
 
           <div className="signin-links">
-            <a href="/forgot-password" className="signin-link">Forgot Password?</a>
-            <a href="/signup" className="signin-link">Create New Account</a>
+            <a href="/signin" className="signin-link">
+              Already have an account?
+            </a>
           </div>
         </form>
 
         <div className="divider">
-          <span>or continue with</span>
+          <span>or sign up with</span>
         </div>
 
-        <button 
+        <button
           className="google-btn"
           onClick={(e) => {
             e.preventDefault();
-            // Adicione aqui a lógica de autenticação com Google
-            console.log("Google Sign-In triggered");
+            console.log("Google Sign-Up triggered");
           }}
         >
           <img
