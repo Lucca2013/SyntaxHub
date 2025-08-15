@@ -1,17 +1,30 @@
 import { Pool } from 'pg';
 import bcrypt from 'bcrypt';
+import { NextRequest } from 'next/server';
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
     rejectUnauthorized: false,
     require: true
-  }
+  } as any
 });
 
-export async function POST(req) {
+interface UserData {
+  username: string;
+  email: string;
+  password: string;
+}
+
+interface UserResult {
+  id: number;
+  username: string;
+  email: string;
+}
+
+export async function POST(req: NextRequest) {
   try {
-    const { username, email, password } = await req.json();
+    const { username, email, password }: UserData = await req.json();
     
     if (!username || !email || !password) {
       return new Response(
@@ -22,7 +35,7 @@ export async function POST(req) {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     
-    const result = await pool.query(
+    const result = await pool.query<UserResult>(
       `INSERT INTO users (username, email, password) 
        VALUES ($1, $2, $3) 
        RETURNING id, username, email`,
@@ -36,7 +49,7 @@ export async function POST(req) {
       }),
       { status: 201 }
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error("Erro ao criar usuário:", error);
     
     if (error.code === '23505') {
