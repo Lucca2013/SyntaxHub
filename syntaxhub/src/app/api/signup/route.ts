@@ -22,19 +22,63 @@ interface UserResult {
   email: string;
 }
 
+async function userExistsByEmail(email: string): Promise<boolean> {
+  const result = await pool.query(
+    `SELECT id FROM users WHERE email = $1`,
+    [email]
+  );
+  if(result.rows.length > 0) {
+    return true;
+  }
+  return false;
+}
+
+async function userExistsByUsername(username: string): Promise<boolean> {
+  const result = await pool.query(
+    `SELECT id FROM users WHERE username = $1`,
+    [username]
+  );
+  if(result.rows.length > 0) {
+    return true;
+  }
+  return false;
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { username, email, password }: UserData = await req.json();
     
     if (!username || !email || !password) {
       return new Response(
-        JSON.stringify({ error: "Todos os campos são obrigatórios" }),
+        JSON.stringify({ error: "All fields are required" }),
+        { status: 400 }
+      );
+    }
+
+    if(password.length < 6) {
+      return new Response(
+        JSON.stringify({ error: "Password must be at least 6 characters long" }),
         { status: 400 }
       );
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    
+
+    if (await userExistsByEmail(email)) {
+      return new Response(
+        JSON.stringify({ error: "Email already registered" }),
+        { status: 409 }
+      );
+    }
+
+    if (await userExistsByUsername(username)) {
+      return new Response(
+        JSON.stringify({ error: "Username already taken" }),
+        { status: 409 }
+      );
+    }
+
+
     const result = await pool.query<UserResult>(
       `INSERT INTO users (username, email, password) 
        VALUES ($1, $2, $3) 
@@ -44,23 +88,23 @@ export async function POST(req: NextRequest) {
 
     return new Response(
       JSON.stringify({ 
-        message: "Usuário criado com sucesso",
+        message: "User created successfully",
         user: result.rows[0] 
       }),
       { status: 201 }
     );
   } catch (error: any) {
-    console.error("Erro ao criar usuário:", error);
-    
+    console.error("Error creating user:", error);
+
     if (error.code === '23505') {
       return new Response(
-        JSON.stringify({ error: "Email já cadastrado" }),
+        JSON.stringify({ error: "Email already registered" }),
         { status: 409 }
       );
     }
     
     return new Response(
-      JSON.stringify({ error: "Erro interno do servidor" }),
+      JSON.stringify({ error: "Internal server error" }),
       { status: 500 }
     );
   }

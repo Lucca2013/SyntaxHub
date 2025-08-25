@@ -42,7 +42,7 @@ export default function Home() {
             <li>Code together in real-time environments</li>
             <li>Accelerate learning by programming together</li>
           </ul>
-          <a href="/signin" className="btn">
+          <a href="/signup" className="btn">
             Get Started
           </a>
         </div>

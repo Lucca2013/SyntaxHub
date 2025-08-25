@@ -32,7 +32,8 @@ export default function Signup() {
         setPassword("");
         setConfirmPassword("");
       } else {
-        alert("Failed to create user.");
+        const errorData = await response.json();
+        alert(errorData.error);
       }
     } catch (error) {
       console.error("Signup error:", error);
