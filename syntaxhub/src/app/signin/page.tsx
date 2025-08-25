@@ -1,6 +1,40 @@
-"use client"; // Adicione esta linha no topo do arquivo
+"use client"; 
+import React, { useState } from "react";
 
 export default function signin() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  async function signinButton(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const info = { email, password };
+
+    try {
+      const response = await fetch("../api/signin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(info),
+      });
+
+      if (response.ok) {
+        const Session = await response.json();
+        localStorage.setItem("user", JSON.stringify(Session.token));
+
+        alert("User signed in successfully!");
+        setEmail("");
+        setPassword("");
+        window.location.href = "/";
+      } else {
+        const errorData = await response.json();
+        alert(errorData.error);
+      }
+    } catch (error) {
+      console.error("Signup error:", error);
+      alert("An error occurred.");
+    }
+  }
+
   return (
     <>
       <meta charSet="UTF-8" />
@@ -329,7 +363,7 @@ export default function signin() {
       <div className="signin-container">
         <h1 className="signin-title">Sign In to SyntaxHub</h1>
 
-        <form className="signin-form">
+        <form className="signin-form" onSubmit={signinButton}>
           <div className="input-group">
             <label htmlFor="email" className="input-label">Email</label>
             <input
@@ -337,6 +371,7 @@ export default function signin() {
               id="email"
               className="input-field"
               placeholder="you@example.com"
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
@@ -348,6 +383,7 @@ export default function signin() {
               id="password"
               className="input-field"
               placeholder="••••••••"
+              onChange={(e) => setPassword(e.target.value)}
               required
             />
           </div>
@@ -366,7 +402,7 @@ export default function signin() {
           <span>or continue with</span>
         </div>
 
-        <button 
+        <button
           className="google-btn"
           onClick={(e) => {
             e.preventDefault();

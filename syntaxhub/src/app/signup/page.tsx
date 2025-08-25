@@ -31,6 +31,7 @@ export default function Signup() {
         setEmail("");
         setPassword("");
         setConfirmPassword("");
+        window.location.href = "/signin";
       } else {
         const errorData = await response.json();
         alert(errorData.error);
